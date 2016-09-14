@@ -97,5 +97,61 @@ Function Start-Countdown {
     Write-Verbose "Countdown complete"
 }
 
+<#
+.SYNOPSIS
+Sends a beep to the console
+
+.DESCRIPTION
+Sends a beep with a desired pitch and duration to the console
+
+.PARAMETER Pitch
+The pitch to use
+
+.PARAMETER Duration
+Duration of the beep in milliseconds
+
+.PARAMETER Repeats
+Number of times to beep. Useful if you want some "pips"
+
+.EXAMPLE
+Start-Beep
+
+Does a beep of default pitch and default duration
+
+.EXAMPLE
+Start-Beep -Duration 1000
+
+Does a beep for 1second 
+
+.EXAMPLE
+Start-Beep -Duration 100 -Repeats 3
+
+Issue 3 pips to the console
+#>
+Function Start-Beep {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false)]
+        [ValidateRange(100, 3000)]
+        [int]$Pitch = 500,
+
+        [Parameter(Mandatory=$false)]
+        [ValidateRange(100, 3000)]
+        [int]$Duration = 300,
+        
+        [Parameter(Mandatory=$false)]
+        [ValidateRange(1, 10)]
+        [int]$Repeats = 1
+    )
+
+    ForEach($repeat in (1..$Repeats))
+    {
+        [Console]::Beep($Pitch, $Duration)    
+    }
+}
+# Define an alias for Start-Beep as just Beep
+New-Alias -Name Beep -Value Start-Beep -Description "Issues a beep to the console" -Force
+
+# Export functions and aliases
 Export-ModuleMember -Function *
 Export-ModuleMember -Alias *
