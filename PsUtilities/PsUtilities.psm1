@@ -152,6 +152,51 @@ Function Start-Beep {
 # Define an alias for Start-Beep as just Beep
 New-Alias -Name Beep -Value Start-Beep -Description "Issues a beep to the console" -Force
 
+<#
+.SYNOPSIS
+Reports Computer Uptime
+
+.DESCRIPTION
+Queries WMI to find out the last boot date and reports back uptime from that value
+
+.PARAMETER ComputerName
+Name of the computer to query
+
+.EXAMPLE
+Get-Uptime
+
+Returns uptime from the current computer
+
+.EXAMPLE
+Get-Uptime -ComputerName Hal
+
+Returns uptime from the computer named Hal
+#>
+Function Get-Uptime {
+    [CmdletBinding()]
+    Param(
+        [string]$ComputerName = $env:COMPUTERNAME
+    )
+    
+    $WmiOS = Get-WmiObject Win32_OperatingSystem -ComputerName $ComputerName -ErrorAction SilentlyContinue
+
+    If ($WmiOS.LastBootUpTime) {
+        $BootDate = $WmiOS.ConvertToDateTime($WmiOS.LastBootUpTime)
+        $Uptime = (Get-Date) - $BootDate
+
+        $Result = @{
+            Uptime  = ("{0}d {1}:{2}:{3}.{4}" -f $Uptime.Days.ToString("#,###"), `
+                                                 $Uptime.Hours.ToString("00"), `
+                                                 $Uptime.Minutes.ToString("00"), `
+                                                 $Uptime.Seconds.ToString("00"), `
+                                                 $Uptime.Milliseconds.ToString("000"))
+            LastBootTime = $BootDate
+        }
+
+        Return New-Object -TypeName PSObject -Property $Result
+    }
+}
+
 # Export functions and aliases
 Export-ModuleMember -Function *
 Export-ModuleMember -Alias *
