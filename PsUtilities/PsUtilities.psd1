@@ -8,7 +8,8 @@
     FunctionsToExport = @(  "Compare-InlineIf",
                             "Start-Countdown",
                             "Start-Beep",
-                            "Get-Uptime")
+                            "Get-Uptime",
+                            "New-Guid")
     VariablesToExport = "*"
     AliasesToExport = @(    "IIf",
                             "Beep")

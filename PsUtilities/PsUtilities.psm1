@@ -206,10 +206,28 @@ Function Get-Uptime {
     Return $Results
 }
 
+
+<#
+.SYNOPSIS
+Creates a new Guid
+
+.DESCRIPTION
+Creates a new Guid. There's really not much else to it.
+
+.EXAMPLE
+New-Guid
+
+Returns a new Guid
+#>
+Function New-Guid {
+    Return [Guid]::NewGuid()
+}
+
 # Export functions and aliases
 Export-ModuleMember -Function   Compare-InlineIf, `
                                 Start-Countdown, `
                                 Start-Beep, `
-                                Get-Uptime `
+                                Get-Uptime, `
+                                New-Guid `
                     -Alias  IIf, `
                             Beep
