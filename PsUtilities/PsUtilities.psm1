@@ -160,7 +160,8 @@ Reports Computer Uptime
 Queries WMI to find out the last boot date and reports back uptime from that value
 
 .PARAMETER ComputerName
-Name of the computer to query
+Name of the computers to query.  Can be a single computer or an array of computer names. Defaults
+to the current host.
 
 .EXAMPLE
 Get-Uptime
@@ -175,28 +176,40 @@ Returns uptime from the computer named Hal
 Function Get-Uptime {
     [CmdletBinding()]
     Param(
-        [string]$ComputerName = $env:COMPUTERNAME
+        [string[]]$ComputerName = $env:COMPUTERNAME
     )
     
-    $WmiOS = Get-WmiObject Win32_OperatingSystem -ComputerName $ComputerName -ErrorAction SilentlyContinue
+    $Results = @()
 
-    If ($WmiOS.LastBootUpTime) {
-        $BootDate = $WmiOS.ConvertToDateTime($WmiOS.LastBootUpTime)
-        $Uptime = (Get-Date) - $BootDate
+    ForEach($Computer In $ComputerName)
+    {
+        $WmiOS = Get-WmiObject Win32_OperatingSystem -ComputerName $Computer
 
-        $Result = @{
-            Uptime  = ("{0}d {1}:{2}:{3}.{4}" -f $Uptime.Days.ToString("#,###"), `
-                                                 $Uptime.Hours.ToString("00"), `
-                                                 $Uptime.Minutes.ToString("00"), `
-                                                 $Uptime.Seconds.ToString("00"), `
-                                                 $Uptime.Milliseconds.ToString("000"))
-            LastBootTime = $BootDate
+        If ($WmiOS.LastBootUpTime) {
+            $BootDate = $WmiOS.ConvertToDateTime($WmiOS.LastBootUpTime)
+            $Uptime = (Get-Date) - $BootDate
+
+            $Result = @{
+                Uptime  = ("{0}d {1}:{2}:{3}.{4}" -f $Uptime.Days.ToString("#,###"), `
+                                                    $Uptime.Hours.ToString("00"), `
+                                                    $Uptime.Minutes.ToString("00"), `
+                                                    $Uptime.Seconds.ToString("00"), `
+                                                    $Uptime.Milliseconds.ToString("000"))
+                LastBootTime = $BootDate
+                Computer = $Computer
+            }
+
+            $Results += (New-Object -TypeName PSObject -Property $Result)
         }
-
-        Return New-Object -TypeName PSObject -Property $Result
     }
+
+    Return $Results
 }
 
 # Export functions and aliases
-Export-ModuleMember -Function *
-Export-ModuleMember -Alias *
+Export-ModuleMember -Function   Compare-InlineIf, `
+                                Start-Countdown, `
+                                Start-Beep, `
+                                Get-Uptime `
+                    -Alias  IIf, `
+                            Beep
